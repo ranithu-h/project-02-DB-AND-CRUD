@@ -8,7 +8,7 @@ const db = new Database('tasks.db');
 db.exec("CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY, title TEXT, done INTEGER);");
 const countRow = db.prepare('SELECT COUNT(*) AS numrow FROM tasks').get()
 
-if (countRow.numrow !== 0){
+if (countRow.numrow === 0){
   const data = [
     {title: "Task 4", done: 0},
     {title: "Task 5", done: 1},
@@ -60,16 +60,16 @@ app.get('/tasks', (req, res) => {
 
       return res.json(not_dont_tasks)
   }
-
-  res.json(tasks);
+  const query = db.prepare('SELECT * FROM tasks').all();
+  res.json(query);
 });
 
 app.get('/tasks/:id', (req, res) =>{
   const id = Number(req.params.id);
-  const task = tasks.find(t => t.id === id);
+  const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
 
   if (!task){
-    return res.status(404).json({ error: "Task ${id} not found" });
+    return res.status(404).json({ error: `Task ${id} not found` });
   }
 
   res.json(task);
