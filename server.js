@@ -31,34 +31,21 @@ const openapiDocument = JSON.parse(readFileSync('./docs/openapi.json', 'utf-8'))
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapiDocument));
 const port = 3000;
 
-let tasks = [
-  {id: 1, title: "Task 1", done: true},
-  {id: 2, title: "Task 2", done: false},
-  {id: 3, title: "Task 3", done: true}
-]
-
-app.get('/', (req, res) => {
+app.get('/', (res) => {
   res.json({ "name": "Task API", 
     "version": "1.0", 
     "endpoints": ["/tasks"] });
 });
 
-app.get('/health', (req, res) => {
+app.get('/health', (res) => {
   res.json({ "status": "OK" });
 });
 
 app.get('/tasks', (req, res) => {
 
   if (req.query.done === "false"){
-    let not_dont_tasks = []
-  
-    for (let i = 0; i < tasks.length; i++){
-      if (tasks[i].done === false){
-        not_dont_tasks.push(tasks[i]);
-      }
-    }
-
-      return res.json(not_dont_tasks)
+    let not_dont_tasks = db.prepare('SELECT * FROM tasks WHERE done = 0').all()
+    return res.json(not_dont_tasks)
   }
   const query = db.prepare('SELECT * FROM tasks').all();
   res.json(query);
