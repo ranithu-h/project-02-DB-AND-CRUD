@@ -42,6 +42,13 @@ app.get('/health', (res) => {
 });
 
 app.get('/tasks', (req, res) => {
+  const done = req.query.done;
+  const search = req.query.search;
+
+  if (search !== undefined) {
+    const results = db.prepare('SELECT * FROM tasks WHERE title LIKE ?').all(`%${search}%`);
+    return res.json(results);
+  }
 
   if (req.query.done === "false"){
     let not_dont_tasks = db.prepare('SELECT * FROM tasks WHERE done = 0').all()
