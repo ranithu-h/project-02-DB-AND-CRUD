@@ -84,50 +84,42 @@ app.post('/tasks', (req, res) => {
 
   const query = db.prepare("INSERT INTO tasks (title, done) VALUES (?,?)").run(title, 0)
 
-  res.status(201).json(db.prepare("SELECT * FROM tasks WHERE title = ?").get(title));
+  res.status(201).json(db.prepare("SELECT * FROM tasks WHERE id = ?").get(query.lastInsertRowid));
 });
 
 app.put('/tasks/:id', (req, res) => {
   const id = Number(req.params.id);
-  const task = tasks.find(t => t.id === id);
-  const title = req.body.title;
-  const done = req.body.done;
+  let title = req.body.title;
+  let done = req.body.done;
+  const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id)
 
   if (!task){
     return res.status(404).json({error: "Unknown id"});
   }
 
-  if (!title && done === undefined){
+  if (title === undefined && done === undefined){
     return res.status(400).json({error: "Empty/Invalid body"})
   }
 
-  if (title !== undefined){
-    task.title = title;
+  if (title === undefined){
+    title = task.title
   }
-
-  if (done !== undefined){
-    task.done = done;
+  if (done === undefined){
+    done = task.done
   }
+  db.prepare("UPDATE tasks SET title = ?, done = ? WHERE id = ?").run(title, done, id)
 
-  res.json(task)
+  res.json(db.prepare("SELECT * FROM tasks WHERE id = ?").get(id))
 });
 
 app.delete('/tasks/:id', (req, res) => {
   const id = Number(req.params.id);
-
-  let indexToRemove = -1;
-
-  for (let i = 0; i < tasks.length; i++) {
-    if (tasks[i].id === id) {
-      indexToRemove = i;
-    }
+  const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id)
+  if (!task) {
+    return res.status(404).json({ error: `Task ${id} not found` })
   }
 
-  if (indexToRemove === -1) {
-    return res.status(404).json({ error: `Task ${id} not found` });
-  }
-
-  tasks.splice(indexToRemove, 1);
+  db.prepare('DELETE FROM tasks WHERE id = ?').run(id)
 
   res.status(204).send();
 });
