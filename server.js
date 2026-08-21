@@ -31,18 +31,17 @@ const openapiDocument = JSON.parse(readFileSync('./docs/openapi.json', 'utf-8'))
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapiDocument));
 const port = 3000;
 
-app.get('/', (res) => {
+app.get('/', (req, res) => {
   res.json({ "name": "Task API", 
     "version": "1.0", 
     "endpoints": ["/tasks"] });
 });
 
-app.get('/health', (res) => {
+app.get('/health', (req, res) => {
   res.json({ "status": "OK" });
 });
 
 app.get('/tasks', (req, res) => {
-  const done = req.query.done;
   const search = req.query.search;
 
   if (search !== undefined) {

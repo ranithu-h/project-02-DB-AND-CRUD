@@ -1,0 +1,14 @@
+{
+  "name": "ai-version",
+  "version": "1.0.0",
+  "description": "AI-generated SQLite migration for Stage 6 comparison",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.2.1"
+  }
+}
